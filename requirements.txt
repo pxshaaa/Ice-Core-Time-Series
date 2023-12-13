@@ -1,0 +1,7 @@
+PyQt5
+matplotlib
+pandas
+pyqtgraph
+File_explorer
+numpy
+PyQtWebEngine
