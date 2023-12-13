@@ -20,7 +20,7 @@ from File import *
 # Plotting graph with matplotlib
 matplotlib.use('Qt5Agg')
 
-class PlotGraph(QWidget):
+class HistogramPlotGraph(QWidget):
     def __init__(self, filepaths, dataframes, parent=None):
         super().__init__(parent)
         self.filepaths = filepaths

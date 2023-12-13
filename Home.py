@@ -7,8 +7,8 @@ from PyQt5.QtCore import Qt
 from File import load_file_on_widget,load_file
 from Plot import plot_widget
 from Linage import PlotGraph
-from Correlation import PlotGraph
-from Histogram import PlotGraph
+from Correlation import CorrelationPlotGraph
+from Histogram import HistogramPlotGraph
 import math 
 import pandas as pd
 from functools import reduce
@@ -246,7 +246,7 @@ class Home(QMainWindow):
     def correlation_window(self):
         # Initialize or refresh the PlotGraph widget with the current data
         if self.filepaths and self.dataframes:
-            correlation_widget = PlotGraph(self.filepaths, list(self.dataframes.values()))
+            correlation_widget = CorrelationPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(correlation_widget)
         else:
             # Handle the case when no files are uploaded
@@ -255,7 +255,7 @@ class Home(QMainWindow):
     def histogram_window(self):
         # Initialize or refresh the PlotGraph widget with the current data
         if self.filepaths and self.dataframes:
-            histogram_widget = PlotGraph(self.filepaths, list(self.dataframes.values()))
+            histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(histogram_widget)
 
 

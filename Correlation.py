@@ -20,7 +20,7 @@ from File import *
 # Plotting graph with matplotlib
 matplotlib.use('Qt5Agg')
 
-class PlotGraph(QtWidgets.QWidget):
+class CorrelationPlotGraph(QtWidgets.QWidget):
     def __init__(self, filepaths, dataframes, parent=None):
         super().__init__(parent)
         self.filepaths = filepaths
