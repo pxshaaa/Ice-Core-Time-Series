@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QComboBo
 import math
 from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
-from lsce_2022.linage_2022 import PlotGraph
+from Linage import PlotGraph
 
 ####################### CHOOSE THE COLUMN TO PLOT GRAPH #######################
 
