@@ -25,7 +25,8 @@ matplotlib.use('tkagg')
 
 matplotlib.use('Qt5Agg')
 
-
+# print
+print('test')
 class Click:
 
     def __init__(self, x, y, plotno):
