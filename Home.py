@@ -17,29 +17,13 @@ from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QPixmap, QDesktopServices
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
-class CorrelationWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-        layout = QVBoxLayout()
-        button = QPushButton("Correlation")
-        layout.addWidget(button)
-        self.setLayout(layout)
-
-class HistogramWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-        layout = QVBoxLayout()
-        button = QPushButton("Histogram")
-        layout.addWidget(button)
-        self.setLayout(layout)
-
-
 class Home(QMainWindow):
     """Create a clean and neat background for the software"""
     
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.initData()
 
         #Afficher l'image
         widget = QWidget(self)
@@ -60,17 +44,9 @@ class Home(QMainWindow):
         # sets the title for the main window. That title will be defined once the file is chosen
         self.setWindowTitle("AnalySeries")
 
-        # store the data as a dataframe once the file is chosen
-        self.filepath = None
-        self.filepaths = []# filepaths will be added to this list as user opens files
-
-        self.dataframe = None
-        self.dataframes = {} # dataframes will be added to this dictionary as user opens files. The key will be the filepath
-        self.list_dataframes =[] # here they wil be stored as a list
-        self.merged_dataframes = None
-
-        # useful for the guide 
-        self.guide = None  
+        # initializes the user guide 
+        self.guide = None
+        
         
     def initUI(self):
 
@@ -82,8 +58,17 @@ class Home(QMainWindow):
         self.create_menu()
 
         self.setMouseTracking(True)
-
     
+    def initData(self):
+
+        # store the data as a dataframe once the file is chosen
+        self.filepath = None
+        self.filepaths = []# filepaths will be added to this list as user opens files
+
+        self.dataframe = None
+        self.dataframes = {} # dataframes will be added to this dictionary as user opens files. The key will be the filepath
+        self.list_dataframes =[] # here they wil be stored as a list
+        #self.merged_dataframes = None
 
 
     def create_menu(self):
