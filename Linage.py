@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QFileDialog, QApplication
+from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QFileDialog, QApplication,QPushButton,QWidget
 from PyQt5 import QtCore, QtWidgets
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -21,12 +21,9 @@ from Data import titlecolumns
 
 # Plotting graph with matplotlib
 matplotlib.use('tkagg')
-
-
 matplotlib.use('Qt5Agg')
 
-# print
-print('test')
+
 class Click:
 
     def __init__(self, x, y, plotno):
@@ -74,6 +71,7 @@ class PlotGraph(QtWidgets.QWidget):
         self.setGeometry(0, 0, 1500, 1000)
 
         # Creates a Figure object
+
         self.figure = Figure()
         self.figure.tight_layout()
         self.graph = FigureCanvas(self.figure) # The canvas is basically an object that allows you to draw.
@@ -162,8 +160,6 @@ class PlotGraph(QtWidgets.QWidget):
                 xx = list(self.columns)[i]
             i += 1
         self.labelx1.setText("x-data: {}".format(index))
-        if self.y_ref is not None:
-            self.graphe1()
 
     def push_choice_y1(self, index):
         self.ord_ref = index
@@ -174,8 +170,6 @@ class PlotGraph(QtWidgets.QWidget):
                 yy = list(self.columns)[i]
             i += 1
         self.labely1.setText("y-data: {}".format(index))
-        if self.x_ref is not None:
-            self.graphe1()
 
     def push_choice_x2(self, index):
         self.abs_dis = index
@@ -186,8 +180,7 @@ class PlotGraph(QtWidgets.QWidget):
                 xx = list(self.columns)[i]
             i += 1
         self.labelx2.setText("x-data: {}".format(index))
-        if self.ord_dis is not None:
-            self.graphe2()
+
 
     def push_choice_y2(self, index):
         self.ord_dis = index
@@ -198,24 +191,15 @@ class PlotGraph(QtWidgets.QWidget):
                 yy = list(self.columns)[i]
             i += 1
         self.labely2.setText("y-data: {}".format(index))
-        if self.abs_dis is not None:
-            self.graphe2()
 
-    def graphe1(self):
-        '''this function is called as soon as the user chooses x or y data for the reference. It will draw the graph if both x and y are chosen'''
-        if self.abs_ref is not None:
-            if self.ord_ref is not None:
-                self.change_all()
-                self.graph.draw()
-                self.show()
+        
+    def perform_action(self):
 
-    def graphe2(self):
-        '''this function is called as soon as the user chooses x or y data for the distorded graph It will draw the graph if both x and y are chosen'''
-        if self.abs_dis is not None:
-            if self.ord_dis is not None:
-                self.change_all()
-                self.graph.draw()
-                self.show()
+        if (self.abs_dis is not None) and (self.ord_dis is not None) and (self.ord_ref is not None) and (self.abs_ref is not None):
+            self.change_all()
+            self.graph.draw()
+            self.show()
+
 
     def change_all(self):
         '''This method updates the graphs as soon as the user changes the x-data or y-data of the reference or the distorded plot'''
@@ -307,6 +291,10 @@ class PlotGraph(QtWidgets.QWidget):
         combobox_abs_dis.currentTextChanged.connect(self.push_choice_x2)
         combobox_ord_dis.currentTextChanged.connect(self.push_choice_y2)
 
+        # Button to trigger the plottings
+        self.perform_action_button = QPushButton("Start")
+        self.perform_action_button.clicked.connect(self.perform_action)
+
         #################
 
         # Create Layout
@@ -325,6 +313,8 @@ class PlotGraph(QtWidgets.QWidget):
         layout.addWidget(self.labelx2, 1, 5)
         layout.addWidget(combobox_ord_dis, 0, 6)
         layout.addWidget(self.labely2, 1, 6)
+        layout.addWidget(self.perform_action_button)
+
         ###################
 
         self.centerBox.setLayout(layout)
@@ -350,6 +340,20 @@ class PlotGraph(QtWidgets.QWidget):
 
         # Add Layout to GroupBox
         self.bottomRightBox.setLayout(layout)
+
+    def new_graph_window(self):
+        
+        self.dynamic_window = QWidget()
+        self.dynamic_window.setWindowTitle('DYNAMIC')
+        self.dynamic_window.setGeometry(100, 100, 400, 200)  # Set the position and size
+        self.dynamic_window.setLayout(QVBoxLayout())  # Use a QVBoxLayout for simplicity
+        self.dynamic_window_label = QLabel('This is the DYNAMIC window.')
+        self.dynamic_window.layout().addWidget(self.dynamic_window_label)
+        self.dynamic_window.layout().addWidget(self.graph)
+        # Connect any signals or perform additional setup as needed
+
+        # Show the main window
+        self.show()
 
     def topLeft(self):
         '''creates a GroupBox and plots agescale ( self.canvas_left)'''
