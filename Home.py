@@ -33,14 +33,6 @@ class HistogramWidget(QWidget):
         layout.addWidget(button)
         self.setLayout(layout)
 
-class LinageWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-        layout = QVBoxLayout()
-        button = QPushButton("Linage")
-        layout.addWidget(button)
-        self.setLayout(layout)
-
 
 class Home(QMainWindow):
     """Create a clean and neat background for the software"""
@@ -81,11 +73,6 @@ class Home(QMainWindow):
         self.guide = None  
         
     def initUI(self):
-        self.setWindowTitle("Main Application")
-        self.setGeometry(100, 100, 800, 600)
-        self.central_widget = CorrelationWidget()  # Default central widget
-        self.setCentralWidget(self.central_widget)
-
 
         # Displays the window 
 
@@ -96,17 +83,7 @@ class Home(QMainWindow):
 
         self.setMouseTracking(True)
 
-    def set_correlation_widget(self):
-        self.central_widget = CorrelationWidget()
-        self.setCentralWidget(self.central_widget)
-
-    def set_histogram_widget(self):
-        self.central_widget = HistogramWidget()
-        self.setCentralWidget(self.central_widget)
     
-    def set_linage_widget(self):
-        self.central_widget = LinageWidget()
-        self.setCentralWidget(self.central_widget)
 
 
     def create_menu(self):
@@ -244,16 +221,10 @@ class Home(QMainWindow):
         self.setCentralWidget(linage_widget)
 
     def correlation_window(self):
-        # Initialize or refresh the PlotGraph widget with the current data
-        if self.filepaths and self.dataframes:
-            correlation_widget = CorrelationPlotGraph(self.filepaths, list(self.dataframes.values()))
-            self.setCentralWidget(correlation_widget)
-        else:
-            # Handle the case when no files are uploaded
-            print("No files uploaded yet.")
+        correlation_widget = CorrelationPlotGraph(self.filepaths,list(self.dataframes.values()))
+        self.setCentralWidget(correlation_widget)
 
     def histogram_window(self):
-        # Initialize or refresh the PlotGraph widget with the current data
         if self.filepaths and self.dataframes:
             histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(histogram_widget)

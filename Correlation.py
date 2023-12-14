@@ -28,7 +28,6 @@ class CorrelationPlotGraph(QtWidgets.QWidget):
 
         self.current_dataframe = None
 
-
         # Additional attributes for the second file selection
         self.current_dataframe2 = None
         self.yFilePath = None  # To track the file path for the Y-axis variable
