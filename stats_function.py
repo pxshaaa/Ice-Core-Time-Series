@@ -22,15 +22,17 @@ from File import *
 # Plotting graph with matplotlib
 matplotlib.use('Qt5Agg')
 
-class DescriptiveStatistics(QWidget):
+class StatsPlotGraph(QWidget):
     def __init__(self, filepaths, dataframes, parent=None):
         super().__init__(parent)
         self.filepaths = filepaths
         self.dataframes = {fp: df for fp, df in zip(filepaths, dataframes)}
 
         self.current_dataframe = None
+        self.selected_variables = []
 
         self.setupUI()
+        self.updateVariableComboBoxes()
 
     def setupUI(self):
         layout = QVBoxLayout()
@@ -39,23 +41,26 @@ class DescriptiveStatistics(QWidget):
         self.fileComboBox.addItem("Select a file...")
         self.fileComboBox.addItems(self.filepaths)
         self.fileComboBox.currentIndexChanged.connect(self.onFileSelected)
-
-        self.variableComboBox = QComboBox()
+        self.variableComboBox1 = QComboBox()
+        self.variableComboBox2 = QComboBox()
 
         self.calculateButton = QPushButton("Calculate Descriptive Statistics")
         self.calculateButton.clicked.connect(self.calculateStatistics)
         self.calculateButton.setEnabled(False)
 
         self.resultTable = QTableWidget()
-        self.resultTable.setRowCount(1)  # One row for the results
-        self.resultTable.setColumnCount(9)  # Nine columns for different statistics
-        self.resultTable.setHorizontalHeaderLabels(["Statistic", "Value"])
+        self.resultTable.setColumnCount(9)  # Adjusted number of columns
+        self.resultTable.setHorizontalHeaderLabels(
+            ["Variable", "Mean", "Variance", "Mode", "Median", 
+             "Pearson Coefficient", "P-value (Pearson)", 
+             "Spearman Coefficient", "P-value (Spearman)"]
+        )
+        self.resultTable.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.resultTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        self.resultTable.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.resultTable.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         layout.addWidget(self.fileComboBox)
-        layout.addWidget(self.variableComboBox)
+        layout.addWidget(self.variableComboBox1)
+        layout.addWidget(self.variableComboBox2)
         layout.addWidget(self.calculateButton)
         layout.addWidget(self.resultTable)
 
@@ -66,58 +71,62 @@ class DescriptiveStatistics(QWidget):
 
     def onFileSelected(self):
         index = self.fileComboBox.currentIndex()
-        if index >= 0 and index < len(self.filepaths):
-            filepath = self.filepaths[index]
+        if index > 0:
+            filepath = self.filepaths[index - 1]
             self.current_dataframe = self.dataframes[filepath]
-            self.updateVariableComboBox()
+            self.updateVariableComboBoxes()
 
-    def updateVariableComboBox(self):
+    def updateVariableComboBoxes(self):
         if self.current_dataframe is not None:
-            self.variableComboBox.clear()
-            self.variableComboBox.addItems(self.current_dataframe.columns)
+            self.variableComboBox1.clear()
+            self.variableComboBox2.clear()
+            self.variableComboBox1.addItems(self.current_dataframe.columns)
+            self.variableComboBox2.addItems(self.current_dataframe.columns)
             self.calculateButton.setEnabled(True)
+        else:
+            self.calculateButton.setEnabled(False)
 
     def calculateStatistics(self):
-        variable = self.variableComboBox.currentText()
+        self.selected_variables = [self.variableComboBox1.currentText(), self.variableComboBox2.currentText()]
+        self.resultTable.setRowCount(len(self.selected_variables))
 
-        if variable and self.current_dataframe is not None:
-            data = self.current_dataframe[variable].dropna()
+        if len(self.selected_variables) == 2:
+            data1 = self.current_dataframe[self.selected_variables[0]].dropna()
+            data2 = self.current_dataframe[self.selected_variables[1]].dropna()
+            pearson_coefficient, pearson_p_value = stats.pearsonr(data1, data2)
+            spearman_coefficient, spearman_p_value = stats.spearmanr(data1, data2)
 
-            mean = data.mean()
-            variance = data.var()
-            mode = data.mode().values[0]
-            median = data.median()
-            pearson_coefficient = stats.pearsonr(data, data)[0]
-            std_deviation = data.std()
-            data_range = data.max() - data.min()
-            skewness = data.skew()
-            kurtosis = data.kurtosis()
-            iqr = data.quantile(0.75) - data.quantile(0.25)
-            cv = (std_deviation / mean) * 100  # Coefficient of Variation
+            for i, variable in enumerate(self.selected_variables):
+                self.calculateAndDisplayStatsForRow(variable, i, pearson_coefficient, pearson_p_value, spearman_coefficient, spearman_p_value)
 
-            # Update the table with statistics
-            self.resultTable.setItem(0, 0, QTableWidgetItem("Mean"))
-            self.resultTable.setItem(0, 1, QTableWidgetItem(str(mean)))
-            self.resultTable.setItem(0, 2, QTableWidgetItem("Variance"))
-            self.resultTable.setItem(0, 3, QTableWidgetItem(str(variance)))
-            self.resultTable.setItem(0, 4, QTableWidgetItem("Mode"))
-            self.resultTable.setItem(0, 5, QTableWidgetItem(str(mode)))
-            self.resultTable.setItem(0, 6, QTableWidgetItem("Median"))
-            self.resultTable.setItem(0, 7, QTableWidgetItem(str(median)))
-            self.resultTable.setItem(0, 8, QTableWidgetItem("Pearson Coefficient"))
-            self.resultTable.setItem(1, 0, QTableWidgetItem(str(pearson_coefficient)))
-            self.resultTable.setItem(1, 1, QTableWidgetItem("Standard Deviation"))
-            self.resultTable.setItem(1, 2, QTableWidgetItem(str(std_deviation)))
-            self.resultTable.setItem(1, 3, QTableWidgetItem("Range"))
-            self.resultTable.setItem(1, 4, QTableWidgetItem(str(data_range)))
-            self.resultTable.setItem(1, 5, QTableWidgetItem("Skewness"))
-            self.resultTable.setItem(1, 6, QTableWidgetItem(str(skewness)))
-            self.resultTable.setItem(1, 7, QTableWidgetItem("Kurtosis"))
-            self.resultTable.setItem(1, 8, QTableWidgetItem(str(kurtosis)))
-            self.resultTable.setItem(2, 0, QTableWidgetItem("Interquartile Range (IQR)"))
-            self.resultTable.setItem(2, 1, QTableWidgetItem(str(iqr)))
-            self.resultTable.setItem(2, 2, QTableWidgetItem("Coefficient of Variation (CV)"))
-            self.resultTable.setItem(2, 3, QTableWidgetItem(str(cv)))
+    def calculateAndDisplayStatsForRow(self, variable, row, pearson_coefficient=None, pearson_p_value=None, spearman_coefficient=None, spearman_p_value=None):
+        data = self.current_dataframe[variable].dropna()
 
-# Assuming these functions are in prepare_linage.py
+        # Define the statistics functions
+        stats_funcs = {
+            'mean': np.mean,
+            'var': np.var,
+            'mode': lambda x: stats.mode(x)[0][0] if len(stats.mode(x)[0]) > 0 else np.nan,
+            'median': np.median,
+        }
+
+        self.resultTable.setItem(row, 0, QTableWidgetItem(variable))
+
+        col_index = 1
+        for key, func in stats_funcs.items():
+            try:
+                value = func(data)
+                value_str = str(round(value, 4)) if not np.isnan(value) else 'NaN'
+            except Exception as e:
+                value_str = 'Error'
+            self.resultTable.setItem(row, col_index, QTableWidgetItem(value_str))
+            col_index += 1
+
+        # Set Pearson and Spearman coefficients and their P-values
+        self.resultTable.setItem(row, 5, QTableWidgetItem(str(round(pearson_coefficient, 4))))
+        self.resultTable.setItem(row, 6, QTableWidgetItem(str(round(pearson_p_value, 4))))
+        self.resultTable.setItem(row, 7, QTableWidgetItem(str(round(spearman_coefficient, 4))))
+        self.resultTable.setItem(row, 8, QTableWidgetItem(str(round(spearman_p_value, 4))))
+
+# Main application code, assuming these functions are in prepare_linage.py
 from prepare_linage import get_data_ready_for_linage

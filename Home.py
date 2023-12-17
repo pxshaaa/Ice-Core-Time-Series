@@ -33,7 +33,7 @@ class HistogramWidget(QWidget):
         button = QPushButton("Histogram")
         layout.addWidget(button)
         self.setLayout(layout)
-#changes made by pasha now
+
 class StatsWidget(QWidget):
     def __init__(self):
         super().__init__()
