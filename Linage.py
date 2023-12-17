@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QFileDialog, QApplication
+from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QFileDialog, QApplication,QPushButton,QWidget
 from PyQt5 import QtCore, QtWidgets
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -21,12 +21,9 @@ from Data import titlecolumns
 
 # Plotting graph with matplotlib
 matplotlib.use('tkagg')
-
-
 matplotlib.use('Qt5Agg')
 
-# print
-print('test')
+
 class Click:
 
     def __init__(self, x, y, plotno):
@@ -58,7 +55,9 @@ class PlotGraph(QtWidgets.QWidget):
 
         self.clicks_dis= []
         self.clicks_ref= []
-        # we set the order in which the clicks should be made to ensure that click are done on the reference before the distorded
+        # we initiale the list containing the lunage windows
+
+        self.allwindows=[]
     
         # we initialize the two interpolation functions: f and its inverse
 
@@ -73,11 +72,6 @@ class PlotGraph(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.setGeometry(0, 0, 1500, 1000)
 
-        # Creates a Figure object
-        self.figure = Figure()
-        self.figure.tight_layout()
-        self.graph = FigureCanvas(self.figure) # The canvas is basically an object that allows you to draw.
-                                                # We call it graph here because we are interested in drawing graphs
 
         # Link the different graphs to the figure canvas
         self.figure_left = plt.figure(tight_layout=True) 
@@ -118,8 +112,6 @@ class PlotGraph(QtWidgets.QWidget):
         QApplication.setStyle("Fusion")
 
     # Those are the commands that actually show all the graphs
-        self.figure_adjust_size()
-        self.graph.draw()
         self.show()
 
     def plot_reference(self):
@@ -162,8 +154,6 @@ class PlotGraph(QtWidgets.QWidget):
                 xx = list(self.columns)[i]
             i += 1
         self.labelx1.setText("x-data: {}".format(index))
-        if self.y_ref is not None:
-            self.graphe1()
 
     def push_choice_y1(self, index):
         self.ord_ref = index
@@ -174,8 +164,6 @@ class PlotGraph(QtWidgets.QWidget):
                 yy = list(self.columns)[i]
             i += 1
         self.labely1.setText("y-data: {}".format(index))
-        if self.x_ref is not None:
-            self.graphe1()
 
     def push_choice_x2(self, index):
         self.abs_dis = index
@@ -186,8 +174,7 @@ class PlotGraph(QtWidgets.QWidget):
                 xx = list(self.columns)[i]
             i += 1
         self.labelx2.setText("x-data: {}".format(index))
-        if self.ord_dis is not None:
-            self.graphe2()
+
 
     def push_choice_y2(self, index):
         self.ord_dis = index
@@ -198,49 +185,39 @@ class PlotGraph(QtWidgets.QWidget):
                 yy = list(self.columns)[i]
             i += 1
         self.labely2.setText("y-data: {}".format(index))
-        if self.abs_dis is not None:
-            self.graphe2()
 
-    def graphe1(self):
-        '''this function is called as soon as the user chooses x or y data for the reference. It will draw the graph if both x and y are chosen'''
-        if self.abs_ref is not None:
-            if self.ord_ref is not None:
-                self.change_all()
+        
+    def perform_action(self):
+
+        if (self.abs_dis is not None) and (self.ord_dis is not None) and (self.ord_ref is not None) and (self.abs_ref is not None):
+
+            # Creates a Figure object
+
+                self.updatedData()
+        
+                self.plot_reference()
+                self.plot_distorded()
+
+                self.start_linage()
                 self.graph.draw()
                 self.show()
 
-    def graphe2(self):
-        '''this function is called as soon as the user chooses x or y data for the distorded graph It will draw the graph if both x and y are chosen'''
-        if self.abs_dis is not None:
-            if self.ord_dis is not None:
-                self.change_all()
-                self.graph.draw()
-                self.show()
+                self.figure_adjust_size()
+                plt.close()
 
-    def change_all(self):
-        '''This method updates the graphs as soon as the user changes the x-data or y-data of the reference or the distorded plot'''
+                self.new_graph_window()
 
-        # this line's purpose is to prepare the data when the user chooses the information that he wants to plot.( get rid of the Nan values)
+    def updatedData(self):
         self.x_ref, self.y_ref, self.x_dis, self.y_dis = \
             get_data_ready_for_linage(
                 self.df, self.abs_ref, self.ord_ref, self.abs_dis, self.ord_dis)
-
-        self.figure.clear(True)  # the current plot is erased to avoid superposition
-
-        # the plotting only start when the data is chosen for the distorded graph
-        if self.abs_dis is not None:
-            if self.ord_dis is not None:
-                self.x_ref, self.y_ref, self.x_dis, self.y_dis = \
-                    get_data_ready_for_linage(
-                        self.df, self.abs_ref, self.ord_ref, self.abs_dis, self.ord_dis)
-                self.new_x_dis = self.x_dis[:] # the distorded abcissa that  will be ploted
-                self.plot_reference()
-                self.plot_distorded()
-                self.start_linage()
-
-        self.figure_adjust_size()
-        plt.close()
-
+        
+        # Update the Figure object so it corresponds to the new data
+        self.figure = Figure()
+        self.figure.tight_layout()
+        self.graph = FigureCanvas(self.figure) # The canvas is basically an object that allows you to draw.
+                                                # We call it graph here because we are interested in drawing graphs
+  
     def start_linage(self):
         '''Once the graphs are plotted, this function creates the pointers to allow the clicks'''
 
@@ -307,6 +284,10 @@ class PlotGraph(QtWidgets.QWidget):
         combobox_abs_dis.currentTextChanged.connect(self.push_choice_x2)
         combobox_ord_dis.currentTextChanged.connect(self.push_choice_y2)
 
+        # Button to trigger the plottings
+        self.perform_action_button = QPushButton("Start")
+        self.perform_action_button.clicked.connect(self.perform_action)
+
         #################
 
         # Create Layout
@@ -325,6 +306,8 @@ class PlotGraph(QtWidgets.QWidget):
         layout.addWidget(self.labelx2, 1, 5)
         layout.addWidget(combobox_ord_dis, 0, 6)
         layout.addWidget(self.labely2, 1, 6)
+        layout.addWidget(self.perform_action_button)
+
         ###################
 
         self.centerBox.setLayout(layout)
@@ -345,11 +328,29 @@ class PlotGraph(QtWidgets.QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         # this is where the bottomRightbox is linked to the graph = Figure Canvas object
-        layout.addWidget(self.graph)
         layout.addWidget(self.fullScreenButton)
 
         # Add Layout to GroupBox
         self.bottomRightBox.setLayout(layout)
+
+    def new_graph_window(self):
+        dynamic_window = QtWidgets.QMainWindow()  # Create a new instance of QMainWindow
+        dynamic_window.setWindowTitle('LinageWindow')
+        dynamic_window.setGeometry(100, 100, 400, 200)  # Set the position and size
+
+        central_widget = QWidget(dynamic_window)  # Create a central widget
+        dynamic_window.setCentralWidget(central_widget)  # Set it as the central widget
+
+        layout = QVBoxLayout(central_widget)  # Use a QVBoxLayout for simplicity
+        dynamic_window_label = QLabel('This is the DYNAMIC window.')
+        layout.addWidget(dynamic_window_label)
+        layout.addWidget(self.graph)
+
+        self.allwindows.append(dynamic_window)
+
+        # Show the new dynamic window
+        dynamic_window.show()
+
 
     def topLeft(self):
         '''creates a GroupBox and plots agescale ( self.canvas_left)'''

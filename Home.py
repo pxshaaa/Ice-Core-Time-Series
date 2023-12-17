@@ -33,7 +33,7 @@ class HistogramWidget(QWidget):
         button = QPushButton("Histogram")
         layout.addWidget(button)
         self.setLayout(layout)
-
+#changes made by pasha now
 class StatsWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -41,6 +41,7 @@ class StatsWidget(QWidget):
         button = QPushButton("Stats")
         layout.addWidget(button)
         self.setLayout(layout)
+
 
 class LinageWidget(QWidget):
     def __init__(self):
@@ -57,6 +58,7 @@ class Home(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.initData()
 
         #Afficher l'image
         widget = QWidget(self)
@@ -77,24 +79,11 @@ class Home(QMainWindow):
         # sets the title for the main window. That title will be defined once the file is chosen
         self.setWindowTitle("AnalySeries")
 
-        # store the data as a dataframe once the file is chosen
-        self.filepath = None
-        self.filepaths = []# filepaths will be added to this list as user opens files
-
-        self.dataframe = None
-        self.dataframes = {} # dataframes will be added to this dictionary as user opens files. The key will be the filepath
-        self.list_dataframes =[] # here they wil be stored as a list
-        self.merged_dataframes = None
-
-        # useful for the guide 
-        self.guide = None  
+        # initializes the user guide 
+        self.guide = None
+        
         
     def initUI(self):
-        self.setWindowTitle("Main Application")
-        self.setGeometry(100, 100, 800, 600)
-        self.central_widget = CorrelationWidget()  # Default central widget
-        self.setCentralWidget(self.central_widget)
-
 
         # Displays the window 
 
@@ -104,6 +93,17 @@ class Home(QMainWindow):
         self.create_menu()
 
         self.setMouseTracking(True)
+    
+    def initData(self):
+
+        # store the data as a dataframe once the file is chosen
+        self.filepath = None
+        self.filepaths = []# filepaths will be added to this list as user opens files
+
+        self.dataframe = None
+        self.dataframes = {} # dataframes will be added to this dictionary as user opens files. The key will be the filepath
+        self.list_dataframes =[] # here they wil be stored as a list
+        #self.merged_dataframes = None
 
     def set_correlation_widget(self):
         self.central_widget = CorrelationWidget()
@@ -262,16 +262,10 @@ class Home(QMainWindow):
         self.setCentralWidget(linage_widget)
 
     def correlation_window(self):
-        # Initialize or refresh the PlotGraph widget with the current data
-        if self.filepaths and self.dataframes:
-            correlation_widget = CorrelationPlotGraph(self.filepaths, list(self.dataframes.values()))
-            self.setCentralWidget(correlation_widget)
-        else:
-            # Handle the case when no files are uploaded
-            print("No files uploaded yet.")
+        correlation_widget = CorrelationPlotGraph(self.filepaths,list(self.dataframes.values()))
+        self.setCentralWidget(correlation_widget)
 
     def histogram_window(self):
-        # Initialize or refresh the PlotGraph widget with the current data
         if self.filepaths and self.dataframes:
             histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(histogram_widget)

@@ -2,14 +2,13 @@ import os
 from numpy import newaxis
 import pyqtgraph as pg
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QComboBox, QFileDialog, QAction, QMainWindow
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QComboBox, QFileDialog, QAction, QMainWindow,QCheckBox,QPushButton
 import math
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 from PyQt5 import QtGui
 from Linage import PlotGraph
 
 ####################### CHOOSE THE COLUMN TO PLOT GRAPH #######################
-
 
 class Graph(QWidget):
     """Widget to open the graph + its buttons with csv data"""
@@ -47,6 +46,10 @@ class Graph(QWidget):
         combobox_ord.currentTextChanged.connect(self.push_choice_y)
 
 
+    # Create a QPushButton to perform the action
+        self.perform_action_button = QPushButton("Visualisez")
+        self.perform_action_button.clicked.connect(self.perform_action)
+
     # Window layout
         layout = QVBoxLayout(self)
         self.setLayout(layout)
@@ -57,6 +60,16 @@ class Graph(QWidget):
         layout.addWidget(combobox_ord)
         layout.addWidget(self.labely)
 
+        # Set spacing between widgets
+        layout.setSpacing(15)  # You can adjust the value as needed
+
+        layout.addStretch(1)
+        layout.addWidget(self.perform_action_button)
+
+        # Center the layout
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+
+
     #  Choice of data for x and y-axis, 
     # let's remember to use this code to extract the column's names to display the dataframe
 
@@ -66,8 +79,7 @@ class Graph(QWidget):
             self.x = index
             self.x_values = list(self.df[index])
             self.labelx.setText(f"x-data: {index}")
-            if self.y is not None:
-                self.graphe()
+
 
     # Simplified method to handle y-axis choice
     def push_choice_y(self, index):
@@ -75,8 +87,7 @@ class Graph(QWidget):
             self.y = index
             self.y_values = list(self.df[index])
             self.labely.setText(f"y-data: {index}")
-            if self.x is not None:
-                self.graphe()
+
 
     def graphe(self): #edited by Pasha
         if self.x is not None and self.y is not None:
@@ -84,23 +95,10 @@ class Graph(QWidget):
             graph_window = Fenetre_graphe(self.x_values, self.y_values, self.x, self.y)
             self.graph_windows.append(graph_window)
             graph_window.show()
-        
-        
-    # test 
     
-    def linage_window(self):
-        self.open_window_linage = PlotGraph(self.file, self.x_values, self.y_values, self.x,
-                                            self.y)
-        self.open_window_linage.show()
-        self.w.close()
-        self.close()
-
-    def correlation_window(self):
-        self.open_window_correlation = PlotGraph(self.file, self.x_values, self.y_values, self.x,
-                                            self.y)
-        self.open_window_correlation.show()
-        self.w.close()
-        self.close()
+        
+    def perform_action(self):
+        self.graphe()
 
 class Choose_Data_Widget(QWidget):
     """Widget to open the graph + its buttons with csv data"""
@@ -131,6 +129,7 @@ class Choose_Data_Widget(QWidget):
         combobox_file.currentTextChanged.connect(self.push_choice_file)
 
 
+
     # Window layout
         layout = QVBoxLayout(self)
         self.setLayout(layout)
@@ -138,10 +137,16 @@ class Choose_Data_Widget(QWidget):
         layout.addWidget(combobox_file)
         self.layout = layout
     
+        layout.setSpacing(20)  # You can adjust the value as needed
+
+        # Center the layout
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+
     def push_choice_file(self,file):
         print('pushing choice')
         self.dataframe_to_display = file
         self.layout.addWidget(Graph(self.dfs[self.dataframe_to_display]))
+
 
 
 
