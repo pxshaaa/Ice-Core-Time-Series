@@ -9,6 +9,7 @@ from Plot import plot_widget
 from Linage import PlotGraph
 from Correlation import CorrelationPlotGraph
 from Histogram import HistogramPlotGraph
+from stats_function import StatsPlotGraph
 import math 
 import pandas as pd
 from functools import reduce
@@ -30,6 +31,14 @@ class HistogramWidget(QWidget):
         super().__init__()
         layout = QVBoxLayout()
         button = QPushButton("Histogram")
+        layout.addWidget(button)
+        self.setLayout(layout)
+
+class StatsWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()
+        button = QPushButton("Stats")
         layout.addWidget(button)
         self.setLayout(layout)
 
@@ -103,6 +112,10 @@ class Home(QMainWindow):
     def set_histogram_widget(self):
         self.central_widget = HistogramWidget()
         self.setCentralWidget(self.central_widget)
+
+    def set_stats_widget(self):
+        self.central_widget = StatsWidget()
+        self.setCentralWidget(self.central_widget)
     
     def set_linage_widget(self):
         self.central_widget = LinageWidget()
@@ -115,7 +128,7 @@ class Home(QMainWindow):
 
         # the purpose of this variable is to refresh the page where the user is when he opens another file
         # this is so that  he does not have to do it himself
-        self.current_window = {'Display': False, 'Plot': False, 'Linage' : False, 'Correlation' : False, 'Histogram' : False, 'Splinage': False}# the different menus he needs to refresh
+        self.current_window = {'Display': False, 'Plot': False, 'Linage' : False, 'Correlation' : False, 'Histogram' : False, 'Stats' : False, 'Splinage': False}# the different menus he needs to refresh
 
         # Module File
         fileMenu = menu.addMenu("File")
@@ -187,10 +200,15 @@ class Home(QMainWindow):
         mathMenu.addAction(correlationAction)
         correlationAction.triggered.connect(self.correlation_window)
 
-        # Function Correlation 
+        # Function Histogram 
         histogramAction = QAction('Histogram',self)
         mathMenu.addAction(histogramAction)
         histogramAction.triggered.connect(self.histogram_window)
+
+        # Function Stats 
+        statsAction = QAction('Stats',self)
+        mathMenu.addAction(statsAction)
+        statsAction.triggered.connect(self.stats_window)
 
         # Fonction Linage 
 
@@ -257,6 +275,12 @@ class Home(QMainWindow):
         if self.filepaths and self.dataframes:
             histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(histogram_widget)
+
+    def stats_window(self):
+        # Initialize or refresh the PlotGraph widget with the current data
+        if self.filepaths and self.dataframes:
+            stats_widget = StatsPlotGraph(self.filepaths, list(self.dataframes.values()))
+            self.setCentralWidget(stats_widget)
 
 
     def plotgraph(self):

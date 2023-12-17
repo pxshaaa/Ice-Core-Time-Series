@@ -1,6 +1,9 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QFileDialog, QApplication
+from PyQt5.QtWidgets import (
+    QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout,
+    QFileDialog, QApplication, QWidget, QTableWidget, QTableWidgetItem
+)
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QTimer
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -11,8 +14,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 from scipy import stats
-# Assuming these functions are in prepare_linage.py
-from prepare_linage import get_data_ready_for_linage
+
 # Import your custom functions from the uploaded files
 from Data import *
 from File import *
@@ -20,15 +22,13 @@ from File import *
 # Plotting graph with matplotlib
 matplotlib.use('Qt5Agg')
 
-class HistogramPlotGraph(QWidget):
+class DescriptiveStatistics(QWidget):
     def __init__(self, filepaths, dataframes, parent=None):
         super().__init__(parent)
         self.filepaths = filepaths
         self.dataframes = {fp: df for fp, df in zip(filepaths, dataframes)}
 
         self.current_dataframe = None
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
 
         self.setupUI()
 
@@ -36,32 +36,36 @@ class HistogramPlotGraph(QWidget):
         layout = QVBoxLayout()
 
         self.fileComboBox = QComboBox()
-        self.fileComboBox.addItem("Select a file for X...")
+        self.fileComboBox.addItem("Select a file...")
         self.fileComboBox.addItems(self.filepaths)
-        self.fileComboBox.currentIndexChanged.connect(lambda: self.onFileSelected('x'))
+        self.fileComboBox.currentIndexChanged.connect(self.onFileSelected)
 
         self.variableComboBox = QComboBox()
 
-        self.plotTypeComboBox = QComboBox()
-        self.plotTypeComboBox.addItems(["PDF", "Cumulative", "Specific Values"])
+        self.calculateButton = QPushButton("Calculate Descriptive Statistics")
+        self.calculateButton.clicked.connect(self.calculateStatistics)
+        self.calculateButton.setEnabled(False)
 
-        self.plotButton = QPushButton("Plot Histogram")
-        self.plotButton.clicked.connect(self.plotHistogram)
-        self.plotButton.setEnabled(False)
+        self.resultTable = QTableWidget()
+        self.resultTable.setRowCount(1)  # One row for the results
+        self.resultTable.setColumnCount(9)  # Nine columns for different statistics
+        self.resultTable.setHorizontalHeaderLabels(["Statistic", "Value"])
+        self.resultTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.resultTable.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.resultTable.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         layout.addWidget(self.fileComboBox)
         layout.addWidget(self.variableComboBox)
-        layout.addWidget(self.plotTypeComboBox)
-        layout.addWidget(self.plotButton)
-        layout.addWidget(self.canvas)
+        layout.addWidget(self.calculateButton)
+        layout.addWidget(self.resultTable)
 
         self.setLayout(layout)
 
         if self.filepaths:
-            self.fileComboBox.setCurrentIndex(1)
+            self.fileComboBox.setCurrentIndex(0)
 
-    def onFileSelected(self, axis):
-        index = self.fileComboBox.currentIndex() - 1
+    def onFileSelected(self):
+        index = self.fileComboBox.currentIndex()
         if index >= 0 and index < len(self.filepaths):
             filepath = self.filepaths[index]
             self.current_dataframe = self.dataframes[filepath]
@@ -71,33 +75,49 @@ class HistogramPlotGraph(QWidget):
         if self.current_dataframe is not None:
             self.variableComboBox.clear()
             self.variableComboBox.addItems(self.current_dataframe.columns)
-            self.plotButton.setEnabled(True)
+            self.calculateButton.setEnabled(True)
 
-    def plotHistogram(self):
+    def calculateStatistics(self):
         variable = self.variableComboBox.currentText()
-        plot_type = self.plotTypeComboBox.currentText()
 
         if variable and self.current_dataframe is not None:
             data = self.current_dataframe[variable].dropna()
 
-            self.figure.clear()
-            ax = self.figure.add_subplot(111)
+            mean = data.mean()
+            variance = data.var()
+            mode = data.mode().values[0]
+            median = data.median()
+            pearson_coefficient = stats.pearsonr(data, data)[0]
+            std_deviation = data.std()
+            data_range = data.max() - data.min()
+            skewness = data.skew()
+            kurtosis = data.kurtosis()
+            iqr = data.quantile(0.75) - data.quantile(0.25)
+            cv = (std_deviation / mean) * 100  # Coefficient of Variation
 
-            if plot_type == "PDF":
-                ax.hist(data, bins=30, density=True, alpha=0.7, color='b')
-                ax.set_ylabel('Probability Density')
-            elif plot_type == "Cumulative":
-                ax.hist(data, bins=30, density=True, alpha=0.7, color='b', cumulative=True)
-                ax.set_ylabel('Cumulative Probability')
-            elif plot_type == "Specific Values":
-                # For specific values, you might want to plot a bar chart or similar
-                # This part depends on how you want to represent specific values
-                # For example, here's a simple bar plot of value counts
-                value_counts = data.value_counts()
-                ax.bar(value_counts.index, value_counts.values)
-                ax.set_ylabel('Counts')
+            # Update the table with statistics
+            self.resultTable.setItem(0, 0, QTableWidgetItem("Mean"))
+            self.resultTable.setItem(0, 1, QTableWidgetItem(str(mean)))
+            self.resultTable.setItem(0, 2, QTableWidgetItem("Variance"))
+            self.resultTable.setItem(0, 3, QTableWidgetItem(str(variance)))
+            self.resultTable.setItem(0, 4, QTableWidgetItem("Mode"))
+            self.resultTable.setItem(0, 5, QTableWidgetItem(str(mode)))
+            self.resultTable.setItem(0, 6, QTableWidgetItem("Median"))
+            self.resultTable.setItem(0, 7, QTableWidgetItem(str(median)))
+            self.resultTable.setItem(0, 8, QTableWidgetItem("Pearson Coefficient"))
+            self.resultTable.setItem(1, 0, QTableWidgetItem(str(pearson_coefficient)))
+            self.resultTable.setItem(1, 1, QTableWidgetItem("Standard Deviation"))
+            self.resultTable.setItem(1, 2, QTableWidgetItem(str(std_deviation)))
+            self.resultTable.setItem(1, 3, QTableWidgetItem("Range"))
+            self.resultTable.setItem(1, 4, QTableWidgetItem(str(data_range)))
+            self.resultTable.setItem(1, 5, QTableWidgetItem("Skewness"))
+            self.resultTable.setItem(1, 6, QTableWidgetItem(str(skewness)))
+            self.resultTable.setItem(1, 7, QTableWidgetItem("Kurtosis"))
+            self.resultTable.setItem(1, 8, QTableWidgetItem(str(kurtosis)))
+            self.resultTable.setItem(2, 0, QTableWidgetItem("Interquartile Range (IQR)"))
+            self.resultTable.setItem(2, 1, QTableWidgetItem(str(iqr)))
+            self.resultTable.setItem(2, 2, QTableWidgetItem("Coefficient of Variation (CV)"))
+            self.resultTable.setItem(2, 3, QTableWidgetItem(str(cv)))
 
-            ax.set_xlabel(variable)
-            ax.set_title(f'{plot_type} Histogram of {variable}')
-
-            self.canvas.draw()
+# Assuming these functions are in prepare_linage.py
+from prepare_linage import get_data_ready_for_linage
