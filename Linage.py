@@ -187,7 +187,7 @@ class PlotGraph(QtWidgets.QWidget):
         self.labely2.setText("y-data: {}".format(index))
 
         
-    def perform_action(self):
+    def perform_plot_action(self):
 
         if (self.abs_dis is not None) and (self.ord_dis is not None) and (self.ord_ref is not None) and (self.abs_ref is not None):
 
@@ -286,7 +286,7 @@ class PlotGraph(QtWidgets.QWidget):
 
         # Button to trigger the plottings
         self.perform_action_button = QPushButton("Start")
-        self.perform_action_button.clicked.connect(self.perform_action)
+        self.perform_action_button.clicked.connect(self.perform_plot_action)
 
         #################
 
