@@ -1,4 +1,5 @@
 from turtle import screensize
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtWidgets import QApplication, QAction, QFileDialog, QLabel, QVBoxLayout,QPushButton,  QScrollBar, QTextEdit
 from PyQt5 import QtGui
@@ -6,7 +7,9 @@ from PyQt5.QtGui import QPixmap, QDesktopServices
 from PyQt5.QtCore import Qt
 from File import load_file_on_widget,load_file
 from Plot import plot_widget
+from Organize_data import WorkSheet
 from Linage import PlotGraph
+from Interpolation import InterpolationWindow
 from Correlation import CorrelationPlotGraph
 from Histogram import HistogramPlotGraph
 from stats_function import StatsPlotGraph
@@ -188,13 +191,13 @@ class Home(QMainWindow):
 
 
         # Module Math 
-        
         mathMenu = menu.addMenu("Math")
-        
-        # Fonction Age scale 
-        agescaleAction = QAction('Age Scale',self)
-        mathMenu.addAction(agescaleAction)
-    
+
+        #Function New sampling
+        newSamplingAction = QAction('New Sampling',self)
+        mathMenu.addAction(newSamplingAction)
+        newSamplingAction.triggered.connect(self.interpolationwindow)
+
         # Function Correlation 
         correlationAction = QAction('Correlation',self)
         mathMenu.addAction(correlationAction)
@@ -210,17 +213,23 @@ class Home(QMainWindow):
         mathMenu.addAction(statsAction)
         statsAction.triggered.connect(self.stats_window)
 
-        # Fonction Linage 
+        #Module Dating
+        datingMenu = menu.addMenu("Dating")
 
+                
+        # Fonction Age scale 
+        agescaleAction = QAction('Age Scale',self)
+        datingMenu.addAction(agescaleAction)
+        # Fonction Linage 
         linageAction = QAction('Linage',self)
-        mathMenu.addAction(linageAction)
+        datingMenu.addAction(linageAction)
         linageAction.triggered.connect(self.linage_window)
 
         # Fonction Splinage
         splinageAction = QAction('Splinage',self)
-        mathMenu.addAction(splinageAction)
-    
+        datingMenu.addAction(splinageAction)
 
+        
         # Module Help
         helpMenu = menu.addMenu("Help")
         
@@ -246,6 +255,8 @@ class Home(QMainWindow):
                 
                 self.reload_menu()
                 print('new file added')
+
+                self.Worksheet = WorkSheet(self.dataframe)
 
 
     def visualize_data(self):
@@ -275,6 +286,11 @@ class Home(QMainWindow):
         if self.filepaths and self.dataframes:
             stats_widget = StatsPlotGraph(self.filepaths, list(self.dataframes.values()))
             self.setCentralWidget(stats_widget)
+    
+    def interpolationwindow(self):
+ 
+        self. interpolationwindow = InterpolationWindow(self.merged_dataframes)
+
 
 
     def plotgraph(self):
