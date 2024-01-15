@@ -7,7 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import interpolate
+from scipy import interpolate,integrate
 
 
 class InterpolationWindow(QtWidgets.QMainWindow):
@@ -319,36 +319,38 @@ class Choicewidget(QtWidgets.QWidget):
 
         self.windowlayout = QVBoxLayout(central_widget)  # Use a QVBoxLayout for simplicity
 
-        if self.interpolationtype == 'Simple interpolation':
-            self.simpleinterpolation()
-            if self.functiontype == 'Linear':
-                line2, = self.ax2.plot(self.new_x, self.new_y, color='r', linewidth=0.5)
-                
-            if self.functiontype == 'Staircase':
-                line2, = self.ax2.plot(self.new_x, self.new_y, color='r',drawstyle ='steps', linewidth=0.5)
-                
-            if self.functiontype == 'Cubic spline':
-                cubicspline = interpolate.CubicSpline(self.new_x,self.new_y)
-                x_smooth = np.arange(min(self.new_x),max(self.new_x),float(self.step_input)/10)
-                line2, =self.ax2.plot(x_smooth,cubicspline(x_smooth), color = 'r')
-
-            self.ax2.set_xlim([float(self.from_input),float(self.to_input)])
-            self.ax2.set_title(f'New Sampling, number of points = {len(self.new_x)}, step = {float(self.step_input)}', loc='right')
-        if self.interpolationtype == 'Integration':
-            1
-
-        self.windowlayout.addWidget(self.graph)
-        self.graph.draw()
-        self.window.show()
-
-    def simpleinterpolation(self):
-
         self.ax1 = self.figure.add_subplot(211)
         line1, = self.ax1.plot(self.x, self.y, color='g', linewidth=0.5)
         self.ax1.set(xlabel=self.abs, ylabel=self.ord)
         self.ax1.set_xlim([float(self.from_input),float(self.to_input)])
         mask = (float(self.from_input) <= self.x) & (self.x <= float(self.to_input))
         self.ax1.set_title(f'Previous Sampling, number of points = {len(self.x[mask])}', loc='right')
+
+        if self.interpolationtype == 'Simple interpolation':
+            self.simpleinterpolation()
+        else:
+            self.integration()
+
+        if self.functiontype == 'Linear':
+            line2, = self.ax2.plot(self.new_x, self.new_y, color='r', linewidth=0.5)
+            
+        if self.functiontype == 'Staircase':
+            line2, = self.ax2.plot(self.new_x, self.new_y, color='r',drawstyle ='steps', linewidth=0.5)
+            
+        if self.functiontype == 'Cubic spline':
+            cubicspline = interpolate.CubicSpline(self.new_x,self.new_y)
+            x_smooth = np.arange(min(self.new_x),max(self.new_x),float(self.step_input)/10)
+            line2, =self.ax2.plot(x_smooth,cubicspline(x_smooth), color = 'r')
+
+        self.ax2.set_xlim([float(self.from_input),float(self.to_input)])
+        self.ax2.set_title(f'New Sampling, number of points = {len(self.new_x)}, step = {float(self.step_input)}', loc='right')
+            
+
+        self.windowlayout.addWidget(self.graph)
+        self.graph.draw()
+        self.window.show()
+
+    def simpleinterpolation(self):
 
         self.ax2 = self.figure.add_subplot(212)
         f = interpolate.interp1d(self.x, self.y)
@@ -358,6 +360,42 @@ class Choicewidget(QtWidgets.QWidget):
         else:
             self.new_x = self.newscale
             self.new_y = f(self.new_x)
+
+    def integration(self):
+
+        self.ax2 = self.figure.add_subplot(212)
+        if self.scalechoice == 'evenlysampled':
+            self.new_x = np.arange(float(self.from_input), float(self.to_input), float(self.step_input))
+        else:
+            self.new_x = self.newscale
+
+
+        self.intervalles = np.zeros(len(self.new_x)+1)
+        self.intervalles[0]=self.new_x[0]
+        self.intervalles[-1]= self.new_x[-1]
+        for i in range(1,len(self.new_x)):
+            self.intervalles[i] = 0.5*(self.new_x[i-1]+self.new_x[i])
+        
+        '''
+        if self.functiontype == 'Linear':
+            self.f = interpolate.interp1d(self.x, self.y)
+
+        if self.functiontype == 'Staircase':
+            self.f = np.piecewise(self.x, [self.x <= xi for xi in self.x], self.y)
+        if self.interpolationtype == 'Integration':
+            self.f =interpolate.CubicSpline(self.x,self.y)
+        '''
+        self.f = interpolate.interp1d(self.x, self.y)
+        #compute the new ordinate
+        self.new_y = np.zeros_like(self.new_x)
+        for i in range(len(self.new_x)):
+            step = self.intervalles[i+1]-self.intervalles[i]
+            result,_ = integrate.quad(self.f,self.intervalles[i],self.intervalles[i+1])
+            self.new_y[i] = result/step
+
+        
+        
+
 
 
 
