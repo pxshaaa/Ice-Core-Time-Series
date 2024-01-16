@@ -11,11 +11,11 @@ from scipy import interpolate,integrate
 
 
 class InterpolationWindow(QtWidgets.QMainWindow):
-    def __init__(self, dataframe, parent=None):
+    def __init__(self, dataframe, organizer, parent=None): #organizer is a window object from the Organize_data file
         super().__init__()
         self.df = dataframe
-
-        self.interpolation_widget = Choicewidget(self.df)
+        self.organizer = organizer
+        self.interpolation_widget = Choicewidget(self.df,self.organizer)
 
         self.setWindowTitle('Resampling')
         screen_geometry = QDesktopWidget().screenGeometry()
@@ -56,18 +56,20 @@ class InterpolationWindow(QtWidgets.QMainWindow):
         self.close()
         
     def show_interpolation(self):
-        if self.interpolation_widget.from_input and  self.interpolation_widget.to_input \
+        if (self.interpolation_widget.scalename or (self.interpolation_widget.from_input and  self.interpolation_widget.to_input ))\
                 and self.interpolation_widget.interpolationtype and self.interpolation_widget.functiontype:
             self.interpolation_widget.interpolate()
-
+            self.interpolation_widget.saveNewSampling()
+        
 
 
 class Choicewidget(QtWidgets.QWidget):
 
-    def __init__(self, dataframe, parent=None):
+    def __init__(self, dataframe, organizer, parent=None):
         super().__init__(parent)
 
         self.df = dataframe
+        self.organizer = organizer
 
         self.choiceAbsToSample = QComboBox()
         self.choiceAbsToSample.addItem('Choose abcissa')
@@ -145,9 +147,9 @@ class Choicewidget(QtWidgets.QWidget):
         self.scalechoice = 'usingscaleof'
 
     def boxforevenlysampled(self):   
-        box_frame = QFrame()
-        box_frame.setFrameShape(QFrame.Box)
-        box_layout = QVBoxLayout(box_frame)
+        self.box_frame = QFrame()
+        self.box_frame.setFrameShape(QFrame.Box)
+        self.box_layout = QVBoxLayout(self.box_frame)
 
         #from
         from_layout = QHBoxLayout()
@@ -206,13 +208,13 @@ class Choicewidget(QtWidgets.QWidget):
         #display current values of the abscissa
         self.extremes_label = QLabel('')       
 
-        box_layout.addWidget(self.extremes_label)
-        box_layout.addLayout(from_layout)
-        box_layout.addLayout(to_layout)
-        box_layout.addLayout(step_layout)
-        box_layout.addWidget(self.counting_label)
+        self.box_layout.addWidget(self.extremes_label)
+        self.box_layout.addLayout(from_layout)
+        self.box_layout.addLayout(to_layout)
+        self.box_layout.addLayout(step_layout)
+        self.box_layout.addWidget(self.counting_label)
 
-        return box_frame
+        return self.box_frame
     
     def increase_number(self):
         input = int(self.to_input)
@@ -265,7 +267,7 @@ class Choicewidget(QtWidgets.QWidget):
 
         box_frame = QFrame()
         box_frame.setFrameShape(QFrame.Box)
-        box_layout = QVBoxLayout(box_frame)
+        self.box_layout = QVBoxLayout(box_frame)
 
         # choose new x-scale
         choiceAbs = QComboBox()
@@ -274,14 +276,15 @@ class Choicewidget(QtWidgets.QWidget):
         choiceAbs.currentTextChanged.connect(self.push_choice_scale)
 
  
-        box_layout.addWidget(QLabel('Choose new scale'))
-        box_layout.addWidget(choiceAbs)
+        self.box_layout.addWidget(QLabel('Choose new scale'))
+        self.box_layout.addWidget(choiceAbs)
         
 
         return box_frame
     
     def push_choice_scale(self,index):
 
+        self.scalename = index #the name of the column used for the sampling
         self.newscale = self.df[index]
         self.newscale = self.newscale[~np.isnan(self.newscale)]
 
@@ -307,6 +310,8 @@ class Choicewidget(QtWidgets.QWidget):
 # the code for the actual interpolation
     
     def interpolate(self):
+
+        #show the interpolation
         self.window = QtWidgets.QMainWindow()
         self.window.setWindowTitle('Interpolation window')
 
@@ -322,14 +327,16 @@ class Choicewidget(QtWidgets.QWidget):
         self.ax1 = self.figure.add_subplot(211)
         line1, = self.ax1.plot(self.x, self.y, color='g', linewidth=0.5)
         self.ax1.set(xlabel=self.abs, ylabel=self.ord)
-        self.ax1.set_xlim([float(self.from_input),float(self.to_input)])
-        mask = (float(self.from_input) <= self.x) & (self.x <= float(self.to_input))
-        self.ax1.set_title(f'Previous Sampling, number of points = {len(self.x[mask])}', loc='right')
+       
 
         if self.interpolationtype == 'Simple interpolation':
             self.simpleinterpolation()
         else:
             self.integration()
+
+        mask = (float(self.from_input) <= self.x) & (self.x <= float(self.to_input))
+        self.ax1.set_title(f'Previous Sampling, number of points = {len(self.x[mask])}', loc='right')
+        self.ax1.set_xlim([float(self.from_input),float(self.to_input)])
 
         if self.functiontype == 'Linear':
             line2, = self.ax2.plot(self.new_x, self.new_y, color='r', linewidth=0.5)
@@ -345,10 +352,11 @@ class Choicewidget(QtWidgets.QWidget):
         self.ax2.set_xlim([float(self.from_input),float(self.to_input)])
         self.ax2.set_title(f'New Sampling, number of points = {len(self.new_x)}, step = {float(self.step_input)}', loc='right')
             
-
         self.windowlayout.addWidget(self.graph)
         self.graph.draw()
         self.window.show()
+
+
 
     def simpleinterpolation(self):
 
@@ -357,17 +365,22 @@ class Choicewidget(QtWidgets.QWidget):
         if self.scalechoice == 'evenlysampled':
             self.new_x = np.arange(float(self.from_input), float(self.to_input), float(self.step_input))
             self.new_y = f(self.new_x)
-        else:
-            self.new_x = self.newscale
+        if self.scalechoice == 'usingscaleof':
+            self.new_x = self.newscale.to_numpy()
             self.new_y = f(self.new_x)
+            self.from_input = self.new_x[0]
+            self.to_input = self.new_x[-1]
+
 
     def integration(self):
 
         self.ax2 = self.figure.add_subplot(212)
         if self.scalechoice == 'evenlysampled':
             self.new_x = np.arange(float(self.from_input), float(self.to_input), float(self.step_input))
-        else:
-            self.new_x = self.newscale
+        if self.scalechoice == 'usingscaleof':
+            self.new_x = self.newscale.to_numpy()
+            self.from_input = self.new_x[0]
+            self.to_input = self.new_x[-1]
 
 
         self.intervalles = np.zeros(len(self.new_x)+1)
@@ -392,7 +405,14 @@ class Choicewidget(QtWidgets.QWidget):
             step = self.intervalles[i+1]-self.intervalles[i]
             result,_ = integrate.quad(self.f,self.intervalles[i],self.intervalles[i+1])
             self.new_y[i] = result/step
-
+    
+    def saveNewSampling(self):
+        if self.scalechoice == 'evenlysampled':
+            title = f'{self.scalechoice} {self.abs} - {self.ord}, step = {self.step_input}, {self.interpolationtype}, {self.functiontype}'
+        else:
+            title = f'{self.scalechoice} {self.abs} - {self.ord}, using scale of  = {self.scalename}, {self.interpolationtype}, {self.functiontype}'
+        
+        self.organizer.add_NewSampling(title,self.window,self.new_x,self.new_y)
         
         
 

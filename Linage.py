@@ -35,11 +35,11 @@ class Click:
 class PlotGraph(QtWidgets.QWidget):
     '''This is the Linage widget that will be merged with the Home window'''
 
-    def __init__(self, data, parent=None):
+    def __init__(self, data,organizer, parent=None):
         '''Data is the only argument of this function. The Linge will start running when data is uploaded on the software'''
 
         super().__init__(parent)
-
+        self.organizer = organizer
         self.df = data
         self.columns = titlecolumns(self.df)
 
@@ -384,6 +384,7 @@ class PlotGraph(QtWidgets.QWidget):
         # Create Layout
         layout = QVBoxLayout()
         self.savebutton = QPushButton('Save')
+        self.savebutton.setDisabled(True)
         self.savebutton.clicked.connect(self.save)
         # this is where the bottomRightbox is linked to the graph = Figure Canvas object
         layout.addWidget(self.savebutton)
@@ -392,6 +393,8 @@ class PlotGraph(QtWidgets.QWidget):
         self.bottomRightBox.setLayout(layout)
     
     def save(self):
+        self.pointers = [self.clicks_ref,self.clicks_dis]
+        self.organizer.add_Linage(self.pointers,self.g,self.derivative,self.overlapping_windows)
         return None
         
 
@@ -613,6 +616,7 @@ class PlotGraph(QtWidgets.QWidget):
                     self.overlapping_windows[i] = self.draw_graphs_overlapped(abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis)
 
                 self.reset.setDisabled(False)
+                self.savebutton.setDisabled(False)
 
             self.linage_points_prep = ['No click yet', 'No click yet']
 

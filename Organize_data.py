@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 import math
-
+from functools import partial
 from pylab import rcParams
 
 
@@ -25,6 +25,8 @@ class WorkSheet(QtWidgets.QMainWindow):
         self.df = dataframe
         self.columns = list(self.df)
         self.is_increasing = {}
+        self.linagefolderscount = 0
+        self.newsamplinfolderscount = 0
         self.detect_monotony()
 
         self.setWindowTitle('Organize your Worksheet')
@@ -123,18 +125,62 @@ class WorkSheet(QtWidgets.QMainWindow):
 
     def add_columns_to_tree(self):
         for column_name in self.columns:
-            item = QTreeWidgetItem(self.tree_widget, [column_name])
             
             # Set icon based on whether it's a file or folder (you can customize the icons)
             if self.abcissas[column_name] is None:
-                icon = self.style().standardIcon(QStyle.SP_DirIcon)
-                item.setIcon(0, icon)
+                item_group = QTreeWidgetItem(self.tree_widget, [column_name])
+                icon_group = self.style().standardIcon(QStyle.SP_DirIcon)
+                item_group.setIcon(0, icon_group)
             else:
                 icon = self.style().standardIcon(QStyle.SP_FileIcon)
-
+                item = QTreeWidgetItem(item_group, [''])
                 item.setIcon(0, icon)
                 item.setText(0, ' ' * 10 + column_name+ ' '+ self.abcissas[column_name])
+    
+    def add_Linage(self,pointers,agescale, sedimentationrate, overlapping_windows):
+        self.linagefolderscount+=1
+        item_group = QTreeWidgetItem(self.tree_widget, [f'Linage {self.linagefolderscount}'])
+        icon_group = self.style().standardIcon(QStyle.SP_DirIcon)
+        item_group.setIcon(0, icon_group)
 
+        for title in ['pointers','agescale','sedimentation_rate', 'overlapped']:
+            item = QTreeWidgetItem(item_group, ['Linage'])
+            icon = self.style().standardIcon(QStyle.SP_FileIcon)
+            item.setIcon(0, icon)
+            item.setText(0, ' ' * 10 + title)
+            self.tree_widget.itemClicked.connect(partial(self.drawlinage,item,title,pointers,agescale, sedimentationrate, overlapping_windows))
+
+
+        return None
+    def drawlinage(self,clicked_item,title,pointers,agescale, sedimentationrate, overlapping_windows,item,column):
+        if clicked_item == item:
+            if title == 'overlapped':
+                for w in overlapping_windows:
+                    w.show()
+
+        return None
+    
+    def add_NewSampling(self,title, savedwindow,new_x,new_y):
+        self.newsamplinfolderscount+=1
+        item_group = QTreeWidgetItem(self.tree_widget, ['New Sampling'])
+        icon_group = self.style().standardIcon(QStyle.SP_DirIcon)
+        item_group.setIcon(0, icon_group)
+
+        item = QTreeWidgetItem(item_group, ['New Sampling'])
+        icon = self.style().standardIcon(QStyle.SP_FileIcon)
+        item.setIcon(0, icon)
+        item.setText(0, ' ' * 10 + title)
+
+        self.tree_widget.itemClicked.connect(partial(self.drawsampling,item,savedwindow,new_x,new_y))
+
+        return None
+    
+
+    def drawsampling(self,clicked_item,savedwindow,new_x,new_y,item,column):
+        # Placeholder for drawing the two arrays
+        # You can implement your drawing logic here
+        if clicked_item == item:
+            savedwindow.show()
 
 def is_monotonic_increasing(array):
     return np.all(np.diff(array) >= 0)

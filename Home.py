@@ -269,27 +269,27 @@ class Home(QMainWindow):
         
 
     def linage_window(self):
-        linage_widget = PlotGraph(self.merged_dataframes)
-        self.setCentralWidget(linage_widget)
+        self.linage_widget = PlotGraph(self.merged_dataframes,self.Worksheet)
+        self.setCentralWidget(self.linage_widget)
 
     def correlation_window(self):
-        correlation_widget = CorrelationPlotGraph(self.filepaths,list(self.dataframes.values()))
-        self.setCentralWidget(correlation_widget)
+        self.correlation_widget = CorrelationPlotGraph(self.filepaths,list(self.dataframes.values()))
+        self.setCentralWidget(self.correlation_widget)
 
     def histogram_window(self):
         if self.filepaths and self.dataframes:
-            histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
-            self.setCentralWidget(histogram_widget)
+            self.histogram_widget = HistogramPlotGraph(self.filepaths, list(self.dataframes.values()))
+            self.setCentralWidget(self.histogram_widget)
 
     def stats_window(self):
         # Initialize or refresh the PlotGraph widget with the current data
         if self.filepaths and self.dataframes:
-            stats_widget = StatsPlotGraph(self.filepaths, list(self.dataframes.values()))
-            self.setCentralWidget(stats_widget)
+            self.stats_widget = StatsPlotGraph(self.filepaths, list(self.dataframes.values()))
+            self.setCentralWidget(self.stats_widget)
     
     def interpolationwindow(self):
  
-        self. interpolationwindow = InterpolationWindow(self.merged_dataframes)
+        self. interpolationwindow = InterpolationWindow(self.merged_dataframes, self.Worksheet)
 
 
 
