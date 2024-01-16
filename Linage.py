@@ -52,7 +52,8 @@ class PlotGraph(QtWidgets.QWidget):
 
         self.abs_ref, self.abs_dis, self.ord_ref, self.ord_dis = None, None, None, None # the names of the columns inside the dataframe
         self.x_ref, self.y_ref, self.x_dis, self.y_dis = None, None, None, None # the x and y -data to start ploting
-        self.pushed_data = []
+        self.pushed_data = {}
+        self.titles = []
 
         self.clicks_dis= []
         self.clicks_ref= []
@@ -166,8 +167,6 @@ class PlotGraph(QtWidgets.QWidget):
                 print('xyA = ',(self.clicks_ref[i],float(new_ref_function (self.clicks_ref[i]))),'xyB =',(self.clicks_ref[i], self.linage_point_pairs[i][1]._y))
                 self.ax2.add_artist(con)
             
-            self.figure_adjust_size()
-            #self.graph.draw()
 
 
 
@@ -242,10 +241,9 @@ class PlotGraph(QtWidgets.QWidget):
 
                 if title not in self.switchButtons:
                     self.switchButtons[title] = self.createswitchbutton(self.abs_ref,self.ord_ref,self.abs_dis,self.ord_dis)
-                    print('ongoing')
                     self.overlapping_windows.append(self.draw_graphs_overlapped(self.abs_ref,self.ord_ref,self.abs_dis,self.ord_dis,
                                                                                   self.x_ref, self.y_ref, self.x_dis, self.y_dis))
-                    print('gone',len(self.overlapping_windows))
+                    print('NOMBRE DE OVERLAPPING WINDOWS ',len(self.overlapping_windows))
 
         
                 self.plot_reference()
@@ -255,19 +253,17 @@ class PlotGraph(QtWidgets.QWidget):
                 self.graph.draw()
                 self.show()
 
-                self.figure_adjust_size()
                 plt.close()
-                print('ready to open correlation')
+
 
                 if self.correlation_window is not None:
                     self.correlation_window.close()
                     self.correlation_window = self.Correlation_window()
                     self.correlation_window.show()
-                    print('window is created and shown')
                 else:
                     self.correlation_window = self.Correlation_window()
                     self.correlation_window.show()
-                    print('window is created and shown')
+
                                     
 
 
@@ -275,8 +271,10 @@ class PlotGraph(QtWidgets.QWidget):
         self.x_ref, self.y_ref, self.x_dis, self.y_dis = \
             get_data_ready_for_linage(
                 self.df, self.abs_ref, self.ord_ref, self.abs_dis, self.ord_dis)
-        if (self.abs_ref,self.ord_ref,self.abs_dis,self.ord_dis) not in  self.pushed_data:
-            self.pushed_data.append((self.abs_ref,self.ord_ref,self.abs_dis,self.ord_dis,self.x_ref, self.y_ref, self.x_dis, self.y_dis))
+        title = f"{self.ord_ref} {self.abs_ref} vs {self.ord_ref} {self.abs_dis}"
+        if title not in  self.pushed_data:
+            self.pushed_data[title] =(self.abs_ref,self.ord_ref,self.abs_dis,self.ord_dis,self.x_ref, self.y_ref, self.x_dis, self.y_dis)
+            self.titles.append(title)
 
     
         
@@ -313,9 +311,6 @@ class PlotGraph(QtWidgets.QWidget):
         self.reset.setDisabled(True)
         self.reset.clicked.connect(self.reset_button_clicked)
 
-        # Create Full Screen Button
-        self.fullScreenButton = QPushButton("Full")
-        self.fullScreenButton.clicked.connect(self.switchFullScreen)
 
         ####################
 
@@ -360,7 +355,7 @@ class PlotGraph(QtWidgets.QWidget):
 
         # Create Layout
         layout = QGridLayout()
-        layout.addWidget(self.fullScreenButton, 0, 0)
+        #layout.addWidget(, 0, 0)
         layout.addWidget(self.reset, 1, 0)
 
         ############
@@ -386,22 +381,18 @@ class PlotGraph(QtWidgets.QWidget):
 
         self.bottomRightBox = QGroupBox()  # "Bottom Right")
 
-
-        # Create Full Screen Button
-        self.fullScreenButton = QPushButton("Full")
-        self.fullScreenButton.setMaximumWidth(100)
-        self.fullScreenButton.setMaximumHeight(20)
-        self.fullScreenButton.clicked.connect(self.switchFullScreen)
-
-
         # Create Layout
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.savebutton = QPushButton('Save')
+        self.savebutton.clicked.connect(self.save)
         # this is where the bottomRightbox is linked to the graph = Figure Canvas object
-        layout.addWidget(self.fullScreenButton)
+        layout.addWidget(self.savebutton)
 
         # Add Layout to GroupBox
         self.bottomRightBox.setLayout(layout)
+    
+    def save(self):
+        return None
         
 
     def Correlation_window(self):
@@ -448,49 +439,6 @@ class PlotGraph(QtWidgets.QWidget):
 
         # Add Layout to GroupBox
         self.topRightBox.setLayout(layout)
-
-    def switchFullScreen(self):
-        '''The action that sets the plots on Full scale is implemented here'''
-        if self.sender().text() == "Full":
-            self.topLeftBox.hide()
-            self.topRightBox.hide()
-            self.centerBox.hide()
-            self.bottomRightBox.hide()
-            # As the Widget self.bottomRightBox will utilize all the Window size, the
-            # size of it is redifinide as it start in (0,0) and utilize a total space
-            # of (9,4) cases.
-            self.mainLayout.addWidget(self.bottomRightBox, 0, 0, 9, 4)
-            self.fullScreenButton.setText("NoFull")
-            self.figure_adjust_size()
-            self.bottomRightBox.show()
-
-        else:
-            self.bottomRightBox.hide()
-            self.topLeftBox.show()
-            self.topRightBox.show()
-            self.centerBox.show()
-            # As the Widget self.bottomRightBox will utilize the original size, the
-            # size of it is redifinid as it start in (9,0) and utilize a total space
-            # of (1,4) cases.
-            self.mainLayout.addWidget(self.bottomRightBox, 9, 0, 1, 4)
-            self.fullScreenButton.setText("Full")
-            self.figure_adjust_size()
-            self.bottomRightBox.show()
-
-    def figure_adjust_size(self):
-        '''Also deals with the Full action'''
-        if self.fullScreenButton.text() == "Full":
-            self.figure.subplots_adjust(top=0.99)
-            self.figure.subplots_adjust(bottom=0.135)
-            self.figure.subplots_adjust(right=0.995)
-            self.figure.subplots_adjust(left=0.08)
-            self.figure.subplots_adjust(hspace=0.32)
-        else:
-            self.figure.subplots_adjust(top=0.95)
-            self.figure.subplots_adjust(bottom=0.1)
-            self.figure.subplots_adjust(right=0.995)
-            self.figure.subplots_adjust(left=0.06)
-            self.figure.subplots_adjust(hspace=0.2)
 
 
     # Checking if the clicks are consistant
@@ -643,8 +591,6 @@ class PlotGraph(QtWidgets.QWidget):
                             self.clicks_ref[i], float(new_dis_function(self.g(self.clicks_ref[i])))), coordsA="data", coordsB="data", axesA=self.ax1, axesB=self.ax2, color='b')
                         print('xyA = ',(self.clicks_ref[i],float(new_ref_function (self.clicks_ref[i]))),'xyB =',(self.clicks_ref[i], self.linage_point_pairs[i][1]._y))
                         self.ax2.add_artist(con)
-                
-                self.figure_adjust_size()
 
                 self.graph.draw()
 
@@ -661,7 +607,8 @@ class PlotGraph(QtWidgets.QWidget):
                 self.draw_canvas_right()
                 self.draw_canvas_left_rate()
                 for i in range(len(self.pushed_data)):
-                    abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis = self.pushed_data[i]           
+                    print('NOMBRE DE OVERLAPPING WINDOWS et DE PUSHED_DATA ',len(self.overlapping_windows),len(self.pushed_data))
+                    abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis = self.pushed_data[self.titles[i]]           
                     self.overlapping_windows[i].close()
                     self.overlapping_windows[i] = self.draw_graphs_overlapped(abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis)
 
@@ -748,27 +695,35 @@ class PlotGraph(QtWidgets.QWidget):
         self.ax1.set(xlabel=self.abs_ref, ylabel=self.ord_ref)
         self.ax1.set_xlim([self.x_ref[0], self.x_ref[-1]])
 
-        self.new_x_dis = self.x_dis[:]
-
-        self.clicks_dis =[]
-        self.clicks_ref=[]
-        
-        self.switchButtons = {}
-        self.correlation_window = None
-        self.overlapping_windows = []
-
 
         self.ax1.figure.canvas.mpl_connect(
             'button_press_event', self.onclick)
-        print("RESET")
+        
+        print("RESETING")
+        # Intialize variables that will be used later
+
         self.linage_point_pairs = ['No pair added yet']
         self.linage_points_prep = ['No click yet', 'No click yet']
 
+        # we initialize the choices of the user to None. ´Thoses variables will be updated when the user choose what he wants to plot
+        self.pushed_data = {}
+        self.titles = []
+
+        self.clicks_dis= []
+        self.clicks_ref= []
+        # we initiale the list containing the correlation and overlapping windows
+
+        self.switchButtons = {}
+        self.correlation_window = None
+        self.overlapping_windows = []
+    
+        # we initialize the two interpolation functions: f and its inverse
 
         self.f = interpolate.interp1d(
             [1, 2], [1, 2], fill_value='extrapolate')
         self.g = interpolate.interp1d(
             [1, 2], [1, 2], fill_value='extrapolate')
+
         
         self.figure_left.clf()
         self.canvas_left.draw()
@@ -784,7 +739,7 @@ class PlotGraph(QtWidgets.QWidget):
             self.ax2.figure.canvas.mpl_connect(
                 'button_press_event', self.onclick)
 
-        self.graph.draw()
+
         self.show()
 
 
