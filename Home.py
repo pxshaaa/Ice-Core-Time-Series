@@ -140,12 +140,12 @@ class Home(QMainWindow):
         newAction = QAction("New", self)# create an element "New" of a menu
         newAction.setShortcut("Ctrl+N")
         fileMenu.addAction(newAction)# add the "New" in the menu "File"
-        
+        newAction.triggered.connect(self.selectFile)
                 # open file
         openAction = QAction("Open", self)# create an element "Open"
         openAction.setShortcut("Ctrl+O")
         fileMenu.addAction(openAction)        # connect the button "Open" with the selectfile method
-        fileMenu.triggered.connect(self.selectFile) # in order to keep this code light we implemented selectfile method later
+        openAction.triggered.connect(self.selectFile) # in order to keep this code light we implemented selectfile method later
         
                 # save File
         saveAction = QAction("Save", self)
@@ -160,6 +160,7 @@ class Home(QMainWindow):
         copyAction = QAction("Copy", self)
         copyAction.setShortcut("Ctrl+C")
         fileMenu.addAction(copyAction)
+        #pasteAction.triggered.connect(self.copy)
 
         pasteAction = QAction("Paste", self)
         pasteAction.setShortcut("Ctrl+P")
@@ -169,6 +170,13 @@ class Home(QMainWindow):
         exitAction = QAction("Exit", self)
         fileMenu.addAction(exitAction)
         #exitAction.triggered.connect(close_window(self))
+
+        #fileMenu.addSeparator()
+        #self.WorksheetAction = QAction("Worksheet",self)
+        #fileMenu.addAction(self.WorksheetAction)
+        #self.WorksheetAction.setDisabled(True)
+        #self.WorksheetAction.triggered.connect(self.show_worksheet)
+
 
         # Module Data
         
@@ -255,9 +263,11 @@ class Home(QMainWindow):
                 
                 self.reload_menu()
                 print('new file added')
-
+                #self.WorksheetAction.setDisabled(False)
                 self.Worksheet = WorkSheet(self.dataframe)
 
+    #def show_worksheet(self):
+        #self.Worksheet.displayWorksheet()
 
     def visualize_data(self):
         data_on_widget= load_file_on_widget(self.dataframes,self.filepaths)

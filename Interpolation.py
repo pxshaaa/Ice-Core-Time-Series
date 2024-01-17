@@ -70,6 +70,7 @@ class Choicewidget(QtWidgets.QWidget):
 
         self.df = dataframe
         self.organizer = organizer
+        self.scalename = False
 
         self.choiceAbsToSample = QComboBox()
         self.choiceAbsToSample.addItem('Choose abcissa')
@@ -171,10 +172,10 @@ class Choicewidget(QtWidgets.QWidget):
         font.setBold(True)
         to_label.setFont(font)
         to_layout.addWidget(to_label)
-        to_input_edit = QLineEdit()
-        self.to_input = to_input_edit.text()
-        to_input_edit.textChanged.connect(self.update_to_input)
-        to_input_edit.setFixedWidth(60)
+        self.to_input_edit = QLineEdit()
+        self.to_input = self.to_input_edit.text()
+        self.to_input_edit.textChanged.connect(self.update_to_input)
+        self.to_input_edit.setFixedWidth(60)
         
         increase_button = QPushButton("►")
         increase_button.setFixedWidth(20)
@@ -186,7 +187,7 @@ class Choicewidget(QtWidgets.QWidget):
 
         to_layout.addWidget(decrease_button)
         to_layout.addWidget(increase_button)
-        to_layout.addWidget(to_input_edit)
+        to_layout.addWidget(self.to_input_edit)
         
 
         #step
@@ -221,6 +222,7 @@ class Choicewidget(QtWidgets.QWidget):
         step = int(self.step_input)
         input+=step
         self.to_input = str(input)
+        self.to_input_edit.setText(self.to_input)
        
     
     def decrease_number(self):
@@ -228,6 +230,8 @@ class Choicewidget(QtWidgets.QWidget):
         step = int(self.step_input)
         input-=step
         self.to_input = str(input)
+        self.to_input_edit.setText(self.to_input)
+        
 
     def count(self):
         if len(self.from_input)>0 and len(self.to_input)>0:

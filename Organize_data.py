@@ -27,6 +27,7 @@ class WorkSheet(QtWidgets.QMainWindow):
         self.is_increasing = {}
         self.linagefolderscount = 0
         self.newsamplinfolderscount = 0
+        self.tree_widget = None
         self.detect_monotony()
 
         self.setWindowTitle('Organize your Worksheet')
@@ -112,9 +113,9 @@ class WorkSheet(QtWidgets.QMainWindow):
         self.worksheetlayout = QVBoxLayout(central_widget)
         
 
-
-        self.tree_widget = QTreeWidget()
-        self.tree_widget.setHeaderLabel("Series Name")
+        if not self.tree_widget:
+            self.tree_widget = QTreeWidget()
+            self.tree_widget.setHeaderLabel("Series Name")
         
         
         self.worksheetlayout.addWidget(self.tree_widget)
@@ -162,7 +163,7 @@ class WorkSheet(QtWidgets.QMainWindow):
     
     def add_NewSampling(self,title, savedwindow,new_x,new_y):
         self.newsamplinfolderscount+=1
-        item_group = QTreeWidgetItem(self.tree_widget, ['New Sampling'])
+        item_group = QTreeWidgetItem(self.tree_widget, [f'New Sampling {self.newsamplinfolderscount}'])
         icon_group = self.style().standardIcon(QStyle.SP_DirIcon)
         item_group.setIcon(0, icon_group)
 
