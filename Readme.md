@@ -5,43 +5,52 @@ The Laboratoire des Sciences du Climat et de l'Environnement (LSCE) at the Paris
 
 ## Membres de l'équipe
 
-- Pierre-Maxime Dodo : pierre-maxime.dodo@student-cs.fr
 - Teddy Tonin : teddy.tonin@student-cs.fr
-- Xavier Ratte : xavier.ratte@student-cs.fr
-- Théau d'Audiffret : theau.daudiffret@student-cs.fr
 - Pasha Alidadi : pasha.alidadi@student-cs.fr
 - Linn Habberstad : linn.habberstad@student-cs.fr
 
 ## Organisation du du code 
 
 - ``main.py`` Runs the app
-- ``File.py`` Uploads data on the app
-- ``Data.py`` Preprocessing
-- ``Home.py`` Create the main window of the app
-- ``Organize_data.py``
+
+The functions that manages the UI
+
+- ``file.py`` Uploads data on the app
+- ``home.py`` Create the main window of the app
+- ``organize_data.py`` Create a worksheet to save the data
+- ``plot.py`` Make plots
 
 The math functions 
 
-- ``Linage.py`` Contains the implementation of the linage functionality. 
-- ``Plot.py``
-- ``Correlation.py``
+
+- ``linage.py`` Contains the implementation of the linage functionality. 
+- ``correlation.py`` 
 - ``stats_function.py``
-- ``Interpolation.py`` 
-- ``Plot.py``
+- ``interpolation.py`` 
 - ``prepare_linage.py`` 
+- ``data.py`` Preprocessing
 
+A folder named 'docs' contains the final report which serves as the documentation of our sowtare. The pitch explains well how the python files interact
+- ``Pitch.pdf``
+- ``Final Report Climatologie.pdf``
 
-Some sample to test the functionalities
-- ``ODPpacifLR04exemples.txt`` 
+A folder 'Tests' contains some ice cores to test the software. the variables in these files are explained in the report
+- ``ODPpacifLR04exemples.txt``  
 - ``EDCicecore.txt`` 
 
 
 
-## Lancement du logiciel 
+## Launch the Software 
+
+Follow these steps:
 
 Install the required libraries:
 
     pip install -Ur requirements.txt
+
+Go into the directory src. To do that you run:
+
+    cd src
 
 Run``main.py``
 
