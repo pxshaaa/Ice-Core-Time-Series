@@ -1,3 +1,5 @@
+# Teddy Tonin
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QPushButton, QLabel, QStyle,QDesktopWidget, QVBoxLayout, QLineEdit,QPushButton,QHBoxLayout,QVBoxLayout,QFrame,QTreeWidget, QTreeWidgetItem
 from PyQt5 import QtWidgets

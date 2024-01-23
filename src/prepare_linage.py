@@ -1,3 +1,6 @@
+# Teddy Tonin
+
+
 from cmath import nan
 import numpy as np
 

@@ -1,3 +1,5 @@
+# Teddy Tonin
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QPushButton, QLabel, QComboBox, QGroupBox, QGridLayout, QVBoxLayout, QApplication,QPushButton,QWidget

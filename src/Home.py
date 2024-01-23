@@ -1,3 +1,5 @@
+# Linn Habberstad, Teddy Tonin and Pasha Alidadi
+
 import os
 from PyQt5.QtWidgets import QMainWindow, QWidget, QAction, QFileDialog, QLabel, QVBoxLayout,QPushButton,QDesktopWidget
 from PyQt5.QtGui import QPixmap

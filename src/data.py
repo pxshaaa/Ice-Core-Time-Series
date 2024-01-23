@@ -1,3 +1,5 @@
+# Teddy Tonin and Pasha Alidadi
+
 from cmath import nan
 import pandas as pd
 

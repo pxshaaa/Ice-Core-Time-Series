@@ -1,3 +1,5 @@
+# Linn Habberstad
+
 import pyqtgraph as pg
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QComboBox,QPushButton

@@ -1,3 +1,5 @@
+# Teddy Tonin, Pasha Alidadi
+
 import io
 from PyQt5.QtWidgets import QWidget,  QLabel, QTableView,QHBoxLayout ,QVBoxLayout,  QComboBox
 from PyQt5 import  QtWidgets
