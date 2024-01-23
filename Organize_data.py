@@ -38,16 +38,13 @@ class WorkSheet(QtWidgets.QMainWindow):
             self.width(),
             self.height()
         )
-
         self.setFixedSize(self.size())
         self.setWindowTitle('Organize your Worksheet')
         main_layout = QVBoxLayout()
-
-        # create a frame to organize the worksheet
+      # create a frame to organize the worksheet
         self.dataBox = QFrame()
         self.dataBox.setFrameShape(QFrame.Box)
         self.dataBoxLayout = QVBoxLayout(self.dataBox)
-
         self.VBoxes = {}
         self.columnsnames ={}
         self.abcissas = {}
@@ -71,7 +68,6 @@ class WorkSheet(QtWidgets.QMainWindow):
             self.dataBoxLayout.addLayout(self.VBoxes[self.columns[i]])
 
         main_layout.addWidget(self.dataBox)
-
         #add exit or cancel buttons
         cancelok = QHBoxLayout()
         cancel = QPushButton('Cancel')
@@ -84,7 +80,6 @@ class WorkSheet(QtWidgets.QMainWindow):
         cancelok.addWidget(ok)
 
         main_layout.addLayout(cancelok)
-
         central_widget = QtWidgets.QWidget(self)
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)

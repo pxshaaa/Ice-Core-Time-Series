@@ -14,24 +14,34 @@ The Laboratoire des Sciences du Climat et de l'Environnement (LSCE) at the Paris
 
 ## Organisation du du code 
 
-- ``Data.py`` Permet l'ouverture des données
-- ``File.py`` Crée le menu pour ouvrir les donées
-- ``Home.py`` Construction de la page d'accueil
-- ``Linage.py`` Lance linage, la fonction principale du logiciel
-- ``Plot.py`` Permet l'affichage des données sous forme de graphique
-- ``Userguide.py`` Contient le guide utilisateur pour l'utilisation du logiciel
-- ``main.py`` Lance le logiciel
-- ``prepare_linage.py`` Prépare les données pour être utilisées dans linage
+- ``main.py`` Runs the app
+- ``File.py`` Uploads data on the app
+- ``Data.py`` Preprocessing
+- ``Home.py`` Create the main window of the app
+- ``Organize_data.py``
+
+The math functions 
+
+- ``Linage.py`` Contains the implementation of the linage functionality. 
+- ``Plot.py``
+- ``Correlation.py``
+- ``stats_function.py``
+- ``Interpolation.py`` 
+- ``Plot.py``
+- ``prepare_linage.py`` 
+
+
+Some sample to test the functionalities
+- ``ODPpacifLR04exemples.txt`` 
+- ``EDCicecore.txt`` 
+
+
 
 ## Lancement du logiciel 
 
-D'abord s'assurer que les modules nécessaires à l'éxecution du logiciel sont installés en éxecutant :
+Install the required libraries:
 
     pip install -Ur requirements.txt
 
-Lancer ``main.py``
-Le logiciel s'exécute.
+Run``main.py``
 
-## Guide utilisateur 
-
-Pour accéder au guide utilisateur du logiciel, lancez la fonction main qui ouvrira le logiciel. Dans la barre de menu en haut de votre écran, cliquez sur **help**, pour accéder au guide utilisateur. Ce guide vous aidera également à ajouter une fonction dans la barre de menu. 

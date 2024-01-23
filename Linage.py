@@ -379,14 +379,14 @@ class PlotGraph(QtWidgets.QWidget):
         '''creates a Groupbox containing the Full button, and later the graph called self.figure to visualize
          the reference and the distorded data '''
 
-        self.bottomRightBox = QGroupBox()  # "Bottom Right")
+        self.bottomRightBox = QGroupBox()  # "Bottom Right"
 
         # Create Layout
         layout = QVBoxLayout()
         self.savebutton = QPushButton('Save')
         self.savebutton.setDisabled(True)
         self.savebutton.clicked.connect(self.save)
-        # this is where the bottomRightbox is linked to the graph = Figure Canvas object
+    
         layout.addWidget(self.savebutton)
 
         # Add Layout to GroupBox
@@ -589,7 +589,7 @@ class PlotGraph(QtWidgets.QWidget):
                 
                 qrows = len(self.linage_point_pairs)
                 if not self.linage_point_pairs == ['No pair added yet']:
-                    for i in range(0,qrows): # à vectoriser
+                    for i in range(0,qrows):
                         con = ConnectionPatch(xyA=(self.clicks_ref[i],float(new_ref_function(self.clicks_ref[i])) ), xyB=(
                             self.clicks_ref[i], float(new_dis_function(self.g(self.clicks_ref[i])))), coordsA="data", coordsB="data", axesA=self.ax1, axesB=self.ax2, color='b')
                         print('xyA = ',(self.clicks_ref[i],float(new_ref_function (self.clicks_ref[i]))),'xyB =',(self.clicks_ref[i], self.linage_point_pairs[i][1]._y))
@@ -610,7 +610,6 @@ class PlotGraph(QtWidgets.QWidget):
                 self.draw_canvas_right()
                 self.draw_canvas_left_rate()
                 for i in range(len(self.pushed_data)):
-                    print('NOMBRE DE OVERLAPPING WINDOWS et DE PUSHED_DATA ',len(self.overlapping_windows),len(self.pushed_data))
                     abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis = self.pushed_data[self.titles[i]]           
                     self.overlapping_windows[i].close()
                     self.overlapping_windows[i] = self.draw_graphs_overlapped(abs_ref, ord_ref, abs_dis, ord_dis,x_ref,y_ref,x_dis,y_dis)
